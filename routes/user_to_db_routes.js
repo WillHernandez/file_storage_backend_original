@@ -6,8 +6,8 @@ const {
 	deleteUser
 	}= require('../controllers/user_to_db_controllers')
 
-router.post('/addUser', addUser)
-router.get('/getUser', getUser)
-router.delete('/deleteUser', deleteUser)
+router.post('/adduser', addUser)
+router.get('/getuser', getUser)
+router.delete('/deleteuser', deleteUser)
 
 module.exports = router

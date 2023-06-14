@@ -11,7 +11,7 @@ app.use(cors({origin: "*"}));
 app.use(express.json());
 // app.use('/auth', personRouter);
 app.use('/api/verify', authRoute)
-app.use('/api/user', userDbRoutes)
+app.use('/api/users', userDbRoutes)
 
 app.listen(port, () => {
 	console.log(`http://localhost:${port}/`)
