@@ -7,7 +7,7 @@ const {
 	}= require('../controllers/user_to_db_controllers')
 
 router.post('/adduser', addUser)
-router.get('/getuser', getUser)
+router.get('/getuser/:id', getUser)
 router.delete('/deleteuser', deleteUser)
 
 module.exports = router
