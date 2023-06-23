@@ -10,9 +10,9 @@ const {
 const upload = multer({ dest: 'uploads/' })
 const multerMiddleWare = upload.array('file', 2)
 
-router.post('/upload', multerMiddleWare, (req, res) => {
+router.post('/upload', multerMiddleWare, (req, res, next) => {
 	res.status(200).json({success: "multer success"})
-})
+}, createAndUploadToFolder)
 
 // app.use((error, req, res, next) => {
 // 	if(error instanceof multer.MulterError) {
