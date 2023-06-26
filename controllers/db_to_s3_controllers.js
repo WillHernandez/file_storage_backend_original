@@ -11,21 +11,7 @@ const { v4: uuidv4 } = require('uuid')
 
 // uploading a new bucket to a place with an existing bucket will overwrite the existing bucket. we must first get the current bucket, add new items to it than upload / replace
 	
-// const createAndUploadToFolder = async (req, res) => {
-// 	const putCommand = new PutObjectCommand({
-// 		Body: req.files[0].buffer, // fill with files from upload form 
-// 		Bucket: process.env.S3_BUCKET_NAME,
-// 		Key: `will2code@aol.com/${req.files[0].originalname}_${uuidv4()}`
-// 	})
-// 	try {
-// 		const result = await s3_Client.send(putCommand)
-// 		console.log(result);
-// 	} catch(e) {
-// 		console.log({error: e});
-// 	}
-// }
-
-const createAndUploadToFolder = async (req, res) => {
+const uploadObjects = async (req, res) => {
 	const putCommands = req.files.map(file => new PutObjectCommand({
 		Body: file.buffer,
 		Bucket: process.env.S3_BUCKET_NAME,
@@ -37,7 +23,7 @@ const createAndUploadToFolder = async (req, res) => {
 		.catch(e => console.log({error: e}))
 	}
 
-const getObject = async (req, res) => {
+const getObjects = async (req, res) => {
 	const getCommand = new GetObjectCommand({ // hardcoded to testing
 		Bucket: process.env.S3_BUCKET_NAME,
 		Key: '107f7414-dcf6-4fba-b1df-ef6cff6c0589.jpg'
@@ -56,6 +42,6 @@ const calculateObjectSize = obj => {
 
 
 module.exports = {
-	createAndUploadToFolder,
-	getObject
+	uploadObjects,
+	getObjects
 }

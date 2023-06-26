@@ -3,11 +3,11 @@ const router = express.Router()
 const { multerMiddleWare } = require('../middlewares/multerMiddleware.js')
 
 const { 
-	createAndUploadToFolder,
-	getObject
+	uploadObjects,
+	getObjects
 } = require('../controllers/db_to_s3_controllers')
 
-router.post('/upload', multerMiddleWare, (req, res, next) => next(), createAndUploadToFolder)
+router.post('/upload', multerMiddleWare, (req, res, next) => next(), uploadObjects)
 
 // should handle errors, not currently working correctly - troubleshoot
 // app.use((error, req, res, next) => {
@@ -18,6 +18,6 @@ router.post('/upload', multerMiddleWare, (req, res, next) => next(), createAndUp
 // 	}
 // })
 
-router.get('/getobject', getObject)
+router.get('/getobject', getObjects)
 
 module.exports = router
