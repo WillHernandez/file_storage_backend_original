@@ -5,37 +5,36 @@ const {
 	DeleteObjectCommand,
 } = require("@aws-sdk/client-s3")
 const s3_Client = new S3Client({ region: "us-east-1" })
+const { v4: uuidv4 } = require('uuid')
 
-// more than likely i am not going to create a folder for each new user but rather one bucket to store all users and their items as key/vals
-// const createBucket = async (req, res) => {
-// 	const bucketName = `${req.body.email}-filestorage-s3-bucket`
-// 	const createCommand = new CreateBucketCommand({ Bucket: bucketName })
+// https://stackoverflow.com/questions/9517198/can-i-update-an-existing-amazon-s3-object
 
+// uploading a new bucket to a place with an existing bucket will overwrite the existing bucket. we must first get the current bucket, add new items to it than upload / replace
+	
+// const createAndUploadToFolder = async (req, res) => {
+// 	const putCommand = new PutObjectCommand({
+// 		Body: req.files[0].buffer, // fill with files from upload form 
+// 		Bucket: process.env.S3_BUCKET_NAME,
+// 		Key: `will2code@aol.com/${req.files[0].originalname}_${uuidv4()}`
+// 	})
 // 	try {
-// 		await s3_Client.send(createCommand)
-// 		console.log(`successfully created bucket ${bucketName}`);
+// 		const result = await s3_Client.send(putCommand)
+// 		console.log(result);
 // 	} catch(e) {
 // 		console.log({error: e});
 // 	}
 // }
 
-// https://stackoverflow.com/questions/9517198/can-i-update-an-existing-amazon-s3-object
-
-// uploading a new bucket to a place with an existing bucket will overwrite the existing bucket. we must first get the current bucket, add new items to it than upload / replace
 const createAndUploadToFolder = async (req, res) => {
-	const putCommand = new PutObjectCommand({
-		Body: req.files[0], // fill with files from upload form 
+	const putCommands = req.files.map(file => new PutObjectCommand({
+		Body: file.buffer,
 		Bucket: process.env.S3_BUCKET_NAME,
-		// Key: req.body.email,
-		Key: `will2code@aolcom/${req.files[0].filename}`
-	})
-	try {
-		const result = await s3_Client.send(putCommand)
-		// console.log(`successfully uploaded files to ${req.body.email}`);
-		console.log(result);
-	} catch(e) {
-		console.log({error: e});
-	}
+		Key: `${req.body.username}/${uuidv4()}_${file.originalname}`
+	}))
+
+Promise.all(putCommands)
+	.then(putCommand => Promise.all(putCommand.map(sendPut => s3_Client.send(sendPut))))
+	.catch(e => console.log({error: e}))
 }
 
 const getObject = async (req, res) => {
@@ -45,7 +44,6 @@ const getObject = async (req, res) => {
 	})
 	try {
 		const result = await s3_Client.send(getCommand)
-		// console.log(`successfully uploaded files to ${req.body.email}`);
 		console.log(result);
 	} catch(e) {
 		console.log({error: e});

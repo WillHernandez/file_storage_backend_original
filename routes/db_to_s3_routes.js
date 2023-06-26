@@ -7,11 +7,9 @@ const {
 	getObject
 } = require('../controllers/db_to_s3_controllers')
 
-router.post('/upload', multerMiddleWare, (req, res, next) => {
-	res.status(200).json({success: "multer success"})
-	next()
-}, createAndUploadToFolder)
+router.post('/upload', multerMiddleWare, (req, res, next) => next(), createAndUploadToFolder)
 
+// should handle errors, not currently working correctly - troubleshoot
 // app.use((error, req, res, next) => {
 // 	if(error instanceof multer.MulterError) {
 // 		if (error.code === 'LIMIT_FILE_COUNT') {
