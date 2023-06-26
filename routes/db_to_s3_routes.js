@@ -1,30 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const app = express()
-const multer = require('multer') // to be run as middleware prior to calling the controller function.. will handle and sort files prior to uploading
-// const multerUtil = require('../utils/multerUtil')
+const { multerMiddleWare } = require('../middlewares/multerMiddleware.js')
+
 const { 
 	createAndUploadToFolder,
 	getObject
 } = require('../controllers/db_to_s3_controllers')
-
-const storage = multer.memoryStorage()
-const fileFilter = (req, file, cb) => {
-	if(file.mimeType.split('/')[0] === "image")	{
-		cb(null, true)
-	} else {
-		cb(new multi.MulterError("LIMIT_UNEXPECTED_FILE", false))
-	}
-}
-const upload = multer({
-	storage,
-	fileFilter,
-	limits: {
-		fileSize: 1000000000,
-		files: 50
-	}
-})
-const multerMiddleWare = upload.array('file', 50)
 
 router.post('/upload', multerMiddleWare, (req, res, next) => {
 	res.status(200).json({success: "multer success"})
