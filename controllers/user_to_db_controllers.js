@@ -33,11 +33,10 @@ const getUser = async (req, res) => {
 	const getCommand = new GetItemCommand(tableParams)
 	try {
 		const clientRes = await ddb_Client.send(getCommand)
+		// localStorage.setItem(req.params.email, JSON.stringify(clientRes.Item)) causes fail
 		if(clientRes && clientRes.Item) {
 			// use res link to s3 bucket, retrieve images and return them to the frontend
 			res.status(200).json(unmarshall(clientRes.Item))
-		} else {
-			res.status(200).json({success: `${req.params.email} added to DB`})
 		}
 	} catch(e) {
 		res.status(400).json({error: e})
