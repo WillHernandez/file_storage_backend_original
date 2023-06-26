@@ -32,10 +32,10 @@ const createAndUploadToFolder = async (req, res) => {
 		Key: `${req.body.username}/${uuidv4()}_${file.originalname}`
 	}))
 
-Promise.all(putCommands)
-	.then(putCommand => Promise.all(putCommand.map(sendPut => s3_Client.send(sendPut))))
-	.catch(e => console.log({error: e}))
-}
+	Promise.all(putCommands)
+		.then(putCommand => Promise.all(putCommand.map(sendPut => s3_Client.send(sendPut))))
+		.catch(e => console.log({error: e}))
+	}
 
 const getObject = async (req, res) => {
 	const getCommand = new GetObjectCommand({ // hardcoded to testing
