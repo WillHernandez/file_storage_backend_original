@@ -4,12 +4,14 @@ const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb')
 const TABLE_NAME = process.env.TABLE_NAME
 
 const addUser = async (req, res) => {
+	// const {username, password, sub, accessToken, idToken, refreshToken } = req.body
+
 	const params = {
 		"TableName": TABLE_NAME, 
 		"Item": marshall({
+			"username" : req.body.email,
 			"sub" : req.body.sub,
-			"email" : req.body.email,
-			"s3url": `https://linktobucket_${req.body.email}/s3`
+			"s3url": `https://linktobucket_${req.body.email}/s3` // does not need to be store on the db
 		})
 	}
   const putCommand = new PutItemCommand(params)
