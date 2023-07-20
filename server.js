@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4000
 const cors = require('cors')
 const userDbRoutes = require('./routes/user_to_db_routes')
 const dbS3Routes = require('./routes/db_to_s3_routes')
@@ -10,7 +10,7 @@ require('dotenv').config()
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 
-app.use(cors({origin: true, credentials: true}));
+app.use(cors({origin: true, credentials: true}))
 app.use(express.json())
 // app.use(cors({
 //   origin: 'http://localhost:3000/', 
@@ -34,7 +34,6 @@ app.use('/api/login', async (req, res) => {
 
 app.use('/api/logout', (req, res) => {
 	req.session.destroy()
-	res.status(200).json('User logged out')
 })
 
 app.use('/api/users', userDbRoutes)
