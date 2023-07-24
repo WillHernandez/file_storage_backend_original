@@ -4,7 +4,8 @@ const { multerMiddleWare } = require('../middlewares/multerMiddleware.js')
 
 const { 
 	uploadObjects,
-	getObjects
+	getSingleObject,
+	getAllObjectsFromS3Bucket
 } = require('../controllers/db_to_s3_controllers')
 
 router.post('/upload', multerMiddleWare, (req, res, next) => next(), uploadObjects)
@@ -18,6 +19,7 @@ router.post('/upload', multerMiddleWare, (req, res, next) => next(), uploadObjec
 // 	}
 // })
 
-router.get('/getobject', getObjects)
+router.get('/getobject', getSingleObject)
+router.get('/getallobjects', getAllObjectsFromS3Bucket)
 
 module.exports = router
