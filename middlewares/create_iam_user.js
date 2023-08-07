@@ -1,13 +1,22 @@
 const { CreateUserCommand, AddUserToGroupCommand, IAMClient } = require("@aws-sdk/client-iam")
-const client = new IAMClient({region: 'us-east-1'});
+// const client = new IAMClient({region: 'us-east-1'});
 
-const newUser = async (req, res)=> {
+const client = new IAMClient({ 
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY,
+		secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
+  },
+  region: process.env.S3_REGION
+ })
+
+const newUser = async (req, res, next)=> {
   const username = req.cookies.username
   const command = new CreateUserCommand({ UserName: username });
   try {
     await client.send(command)
     await addToGroup(username) // may not have to await as its doing so in the func
-    res.end()
+    req.session.authorized = true
+    next()
   } catch(e) {
     res.status(200).json({error: e})
   }

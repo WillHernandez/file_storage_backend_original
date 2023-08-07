@@ -7,6 +7,7 @@ const dbS3Routes = require('./routes/db_to_s3_routes')
 const policyRoutes = require('./routes/policyRoutes')
 require('dotenv').config()
 const { validateToken } = require('./middlewares/validateToken.js')
+const { assumeRole } = require('./middlewares/assume_role.js')
 require('dotenv').config()
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
@@ -21,17 +22,13 @@ const isAuthorized = (req, res, next) => {
 	if(req.session.authorized && req.session.authorized == true) {
 		next()
 	} else {
-		res.status(200).json('user is no longer authorized')
+		res.status(400).json('user is no longer authorized')
 	}
 }
 
-app.use('/api/newuserlogin', async (req, res) => {
-    req.session.authorized = true
-		res.end()
-})
-
 app.use('/api/userlogin', async (req, res) => {
 		await validateToken(req, res)
+		await assumeRole(req,res)
 		res.end()
 })
 
@@ -43,7 +40,6 @@ app.use('/api/logout', (req, res) => {
 app.use('/api/newuser', policyRoutes)
 app.use('/api/users', userDbRoutes)
 app.use('/api/bucket', isAuthorized, dbS3Routes)
-// app.use('/api/bucket', dbS3Routes)
 
 app.listen(port, () => {
 	console.log(`http://localhost:${port}/`)
