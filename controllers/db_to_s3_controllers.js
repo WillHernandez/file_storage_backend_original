@@ -11,7 +11,7 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
 
 const uploadObjects = (req, res) => {
 	const client = new S3Client({
-		region: 'us-east-1',
+		region: process.env.S3_REGION,
 		credentials: {
 			accessKeyId: req.session.Credentials.AccessKeyId,
 			secretAccessKey: req.session.Credentials.SecretAccessKey,

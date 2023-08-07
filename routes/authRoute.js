@@ -4,7 +4,7 @@ const CognitoExpress = require("cognito-express")
 require('dotenv').config()
 
 const cognitoExpress = new CognitoExpress({
-	region: "us-east-1",
+	region: process.env.S3_REGION,
 	cognitoUserPoolId: process.env.USER_POOL_ID,
 	tokenUse: "access",
 	tokenExpiration: 3600000
