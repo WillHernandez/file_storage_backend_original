@@ -10,8 +10,8 @@ const assumeRole = async (req, res, next) => {
 	});
 
 	const input = { 
-		RoleArn: `arn:aws:iam::666073547644:role/File-Storage-Root-AssumeRole`,
-		RoleSessionName: `file-storage-user-session-${req.cookies.username}`,
+		RoleArn: process.env.IAM_ASSUMEROLE_ARN,
+		RoleSessionName: `file-storage-role-session-${req.cookies.username}`,
 		DurationSeconds: 3600
 	}
 
