@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-AWS.config.update({ region: 'us-east-1' }); // Set your AWS region
+AWS.config.update({ region: process.env.S3_REGION }); // Set your AWS region
 const cognito = new AWS.CognitoIdentityServiceProvider();
 
 const validateToken = async (req, res, next) => {

@@ -1,12 +1,11 @@
 const { CreateUserCommand, AddUserToGroupCommand, IAMClient } = require("@aws-sdk/client-iam")
-// const client = new IAMClient({region: 'us-east-1'});
 
 const client = new IAMClient({ 
+  region: process.env.S3_REGION,
   credentials: {
     accessKeyId: process.env.S3_ACCESS_KEY,
 		secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
-  },
-  region: process.env.S3_REGION
+  }
  })
 
 const newUser = async (req, res, next)=> {
