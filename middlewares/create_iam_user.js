@@ -10,7 +10,7 @@ const client = new IAMClient({
 
 const newUser = async (req, res, next)=> {
   const username = req.cookies.username
-  const command = new CreateUserCommand({ UserName: username });
+  const command = new CreateUserCommand({ UserName: username })
   try {
     await client.send(command)
     await addToGroup(username) // may not have to await as its doing so in the func
@@ -26,7 +26,7 @@ const addToGroup = async (username) => {
     GroupName: process.env.IAM_USER_GROUP,
     UserName: username
   };
-  const command = new AddUserToGroupCommand(input);
+  const command = new AddUserToGroupCommand(input)
   return await client.send(command)
 }
 

@@ -1,6 +1,6 @@
 const { STSClient, AssumeRoleCommand } = require("@aws-sdk/client-sts")
 
-const assumeRole = async (req, res, next) => {
+const assumeRole = async (req, res) => {
 	const client = new STSClient({ 
 		region: process.env.S3_REGION,
 		credentials: { 
@@ -16,12 +16,11 @@ const assumeRole = async (req, res, next) => {
 	}
 
 	try {
-		const command = new AssumeRoleCommand(input);
-		const response = await client.send(command);
+		const command = new AssumeRoleCommand(input)
+		const response = await client.send(command)
 		req.session.Credentials = response.Credentials
-		next()
 	} catch(e) { 
-		res.status(400).json({error: e})
+		return res.status(400).json({error: e})
 	}
 }
 
