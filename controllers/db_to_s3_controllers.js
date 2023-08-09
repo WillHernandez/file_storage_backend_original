@@ -9,7 +9,7 @@ const {
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
 // const { v4: uuidv4 } = require('uuid')
 
-const uploadObjects = (req, res) => {
+const uploadObjects = async (req, res) => {
 	const client = new S3Client({
 		region: process.env.S3_REGION,
 		credentials: {
@@ -18,7 +18,6 @@ const uploadObjects = (req, res) => {
 			sessionToken: req.session.Credentials.SessionToken
 		}
 	});
-
 
 	// const userObjects = await getAllObjectsFromS3Bucket(req, res)
 	const putCommands = req.files.map(file => new PutObjectCommand({
@@ -31,10 +30,13 @@ const uploadObjects = (req, res) => {
 		// `${req.cookies.username}/${file.originalname}`
 	}))
 
-	Promise.all(putCommands)
-		.then(putCommand => Promise.all(putCommand.map(sendPut => client.send(sendPut))))
-		.then(res.status(200).json({uploadObjects: "success"}))
-		.catch(e => { console.log(e); res.status(400).json({error: e}) })
+	try {
+		const commands = await Promise.all(putCommands)
+		await Promise.all(commands.map(cmd => client.send(cmd)))
+		res.status(200).json({ uploadObjects: "success" })
+	} catch(e) {
+		res.status(400).json({error: e})
+	}
 }
 
 const getSingleObject = async (req, res) => {
