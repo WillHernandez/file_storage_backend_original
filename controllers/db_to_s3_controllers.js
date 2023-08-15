@@ -7,15 +7,17 @@ const {
 } = require("@aws-sdk/client-s3")
 
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
+const { postRedisCache, updateRedisCache } =  require('../middlewares/redis_cache')
 // const { v4: uuidv4 } = require('uuid')
 
 const uploadObjects = async (req, res) => {
+	const { AccessKeyId, SecretAccessKey, SessionToken } = req.Credentials
 	const client = new S3Client({
 		region: process.env.S3_REGION,
 		credentials: {
-			accessKeyId: req.session.Credentials.AccessKeyId,
-			secretAccessKey: req.session.Credentials.SecretAccessKey,
-			sessionToken: req.session.Credentials.SessionToken
+			accessKeyId: AccessKeyId,
+			secretAccessKey: SecretAccessKey,
+			sessionToken: SessionToken
 		}
 	});
 
@@ -32,42 +34,39 @@ const uploadObjects = async (req, res) => {
 
 	try {
 		const commands = await Promise.all(putCommands)
-		await Promise.all(commands.map(cmd => client.send(cmd)))
-		res.status(200).json({ uploadObjects: "success" })
+		// upload images to s3
+		await Promise.all(commands.map(cmd => client.send(cmd))) // req was successful
+		// get full s3 objects
+		const getCommands = commands.map(cmd =>
+			new GetObjectCommand({
+				Bucket: process.env.S3_BUCKET_NAME,
+				Key: cmd.input.Key
+			}), { Expires: 3600 }
+		)
+		// get presigned urls for all new uploaded objects
+		const urlsArr = await Promise.all(getCommands.map(cmd => getSignedUrl(client, cmd)))
+		// update redis with new urls and return full urlsArr
+		await updateRedisCache(req, res, urlsArr)
 	} catch(e) {
 		res.status(400).json({error: e})
 	}
 }
 
-const getSingleObject = async (req, res) => {
-	const getCommand = new GetObjectCommand({ // hardcoded filename for testing
-		Bucket: process.env.S3_BUCKET_NAME,
-		Key: 'brccklyn86@gmail.com/IMG_0942 copy.HEIC'
-	})
-	try {
-		return await client.send(getCommand)
-	} catch(e) {
-		console.log({error: e});
-	}
-}
-
-const getAllObjectsFromS3Bucket = async (req, res) => {
-	// const preSigned = await createPresignedUrl()
-	// console.log(preSigned);
+const getAllObjectsFromS3Bucket = async (req, res, client) => {
 	const getAllCommand = new ListObjectsV2Command({
     Bucket: process.env.S3_BUCKET_NAME, 
     MaxKeys: 100,
   });
 
-	const contents = new Set()
+	const contents = []
   try {
     let isTruncated = true;
 
     while (isTruncated) {
-      const { Contents, IsTruncated, NextContinuationToken } = await client.send(getAllCommand);
+      const { Contents, IsTruncated, NextContinuationToken } = await client.send(getAllCommand)
 			Contents.map((c) => {
-				if(c.Key.startsWith(req.cookies.username))
-					contents.add(c.Key)
+				if(c.Key.startsWith(`home/${req.cookies.username}`))
+					contents.push(c.Key)
 				}); 
       isTruncated = IsTruncated;
       getAllCommand.input.ContinuationToken = NextContinuationToken;
@@ -82,24 +81,36 @@ const calculateObjectSize = obj => {
 
 }
 
-const createPresignedUrl = async () => {
-	const obj = await getSingleObject()
-	// const userObjects = await getAllObjectsFromS3Bucket(req, res)
-	// const keys = Array.from(userObjects)
+const getPresignedUrls = async (req, res) => {
+	const { AccessKeyId, SecretAccessKey, SessionToken } = req.Credentials
 
-	const url = await getSignedUrl(client, new GetObjectCommand({ // hardcoded to testing
-		Bucket: process.env.S3_BUCKET_NAME,
-		Key: 'brccklyn86@gmail.com/IMG_0942 copy.HEIC'
-	}), { Expires: 3600 })
-  // const urls = keys.map(key => getSignedUrl(
+	const client = new S3Client({
+		region: process.env.S3_REGION,
+		credentials: {
+			accessKeyId: AccessKeyId,
+			secretAccessKey: SecretAccessKey,
+			sessionToken: SessionToken
+		}
+	});
 
-	// ))
-	return url
-};
+	const keys = await getAllObjectsFromS3Bucket(req, res, client)
+	const getCommands = keys.map(key =>
+		new GetObjectCommand({
+			Bucket: process.env.S3_BUCKET_NAME,
+			Key: key
+		}), { Expires: 3600 }
+	)
 
+	try {
+		const urls = await Promise.all(getCommands.map(cmd => getSignedUrl(client, cmd)))
+		return await postRedisCache(req, res, urls)
+	} catch(e) {
+		res.status(400).json({error: e})
+	}
+}
 
 module.exports = {
 	uploadObjects,
-	getSingleObject,
-	getAllObjectsFromS3Bucket
+	getAllObjectsFromS3Bucket,
+	getPresignedUrls
 }

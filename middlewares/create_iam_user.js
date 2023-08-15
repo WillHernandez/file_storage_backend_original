@@ -10,14 +10,9 @@ const createIamUser = async (req, res, next)=> {
   })
   const username = req.cookies.username
   const command = new CreateUserCommand({ UserName: username })
-  try {
-    await client.send(command)
-    addUserToGroup(username, client) // may not have to await as its doing so in the func
-    req.session.authorized = true
-    next()
-  } catch(e) {
-    res.status(400).json({error: e})
-  }
+  await client.send(command)
+  await addUserToGroup(username, client)
+  req.session.authorized = true
 };
 
 const addUserToGroup = async (username, client) => {

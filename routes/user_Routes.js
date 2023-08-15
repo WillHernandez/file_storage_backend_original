@@ -1,12 +1,21 @@
 const express = require('express')
 const router = express.Router()
 const { createIamUser } = require('../middlewares/create_iam_user')
-const { assumeRole } = require('../middlewares/assume_role.js')
+const { flushRedis } = require('../middlewares/redis_cache')
 
-router.post('/newuser', createIamUser, assumeRole)
-router.post('/login', assumeRole)
-router.get('/logout', (req, res) => {
+// populates backend with frontend cookies after successful account creation
+router.post('/newuser', async (req, res) => {
+	await createIamUser(req, res);
+	res.end()
+}) 
+
+// populates backend with frontend cookies
+router.post('/login', (req, res) => res.end())
+
+router.get('/logout', async (req, res) => {
 	req.session.destroy()
+	await flushRedis()
+	res.clearCookie('Credentials');
 	res.end()
 })
 
