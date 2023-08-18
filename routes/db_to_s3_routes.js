@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { multerMiddleWare } = require('../middlewares/multerMiddleware.js')
 const { convertHeic } = require('../middlewares/convert_heic')
-const { getRedisCache, postRedisCache } = require('../middlewares/redis_cache.js')
+const { getRedisCache } = require('../middlewares/redis_cache.js')
 const { assumeRole } = require('../middlewares/assume_role.js')
 
 const { 

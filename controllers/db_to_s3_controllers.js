@@ -8,7 +8,8 @@ const {
 
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
 const { postRedisCache, updateRedisCache } =  require('../middlewares/redis_cache')
-// const { v4: uuidv4 } = require('uuid')
+
+const s3ObjectFileNames = new Set()
 
 const uploadObjects = async (req, res) => {
 	const { AccessKeyId, SecretAccessKey, SessionToken } = req.Credentials
@@ -21,15 +22,22 @@ const uploadObjects = async (req, res) => {
 		}
 	});
 
+	const fileIsDuplicate = file => {
+		let fileName = `home/${req.cookies.username}/${file.originalname}`
+		if(s3ObjectFileNames.has(fileName)) {
+			fileName = `home/${req.cookies.username}/copy_${file.originalname}`
+		}
+		// update set for fast lookup
+		s3ObjectFileNames.add(fileName)
+		return fileName
+	}
+
 	// const userObjects = await getAllObjectsFromS3Bucket(req, res)
 	const putCommands = req.files.map(file => new PutObjectCommand({
-		ContentType: 'image/jpeg',
+		ContentType: file.mimetype,
 		Body: file.buffer,
 		Bucket: process.env.S3_BUCKET_NAME,
-		Key: `home/${req.cookies.username}/${file.originalname}`
-		// Key: userObjects.has(`${req.cookies.username}/${file.originalname}`) ? 
-		// `${req.cookies.username}/copy_${file.originalname}` : 
-		// `${req.cookies.username}/${file.originalname}`
+		Key: fileIsDuplicate(file)
 	}))
 
 	try {
@@ -58,27 +66,21 @@ const getAllObjectsFromS3Bucket = async (req, res, client) => {
     MaxKeys: 100,
   });
 
-	const contents = []
   try {
     let isTruncated = true;
-
     while (isTruncated) {
       const { Contents, IsTruncated, NextContinuationToken } = await client.send(getAllCommand)
 			Contents.map((c) => {
 				if(c.Key.startsWith(`home/${req.cookies.username}`))
-					contents.push(c.Key)
+						s3ObjectFileNames.add(c.Key)
 				}); 
       isTruncated = IsTruncated;
       getAllCommand.input.ContinuationToken = NextContinuationToken;
     }
-		return contents
+		return
   } catch (err) {
     console.error(err);
   }
-}
-
-const calculateObjectSize = obj => {
-
 }
 
 const getPresignedUrls = async (req, res) => {
@@ -93,14 +95,16 @@ const getPresignedUrls = async (req, res) => {
 		}
 	});
 
-	const keys = await getAllObjectsFromS3Bucket(req, res, client)
-	const getCommands = keys.map(key =>
+	await getAllObjectsFromS3Bucket(req, res, client)
+	const fileKeyArr = Array.from(s3ObjectFileNames)
+
+	const getCommands = fileKeyArr.map(key =>
 		new GetObjectCommand({
 			Bucket: process.env.S3_BUCKET_NAME,
 			Key: key
 		}), { Expires: 3600 }
 	)
-
+	
 	try {
 		const urls = await Promise.all(getCommands.map(cmd => getSignedUrl(client, cmd)))
 		return await postRedisCache(req, res, urls)
