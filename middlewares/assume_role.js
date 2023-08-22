@@ -7,7 +7,7 @@ const assumeRole = async (req, res, next) => {
 			accessKeyId: process.env.S3_ADMIN_KEY,
 			 secretAccessKey: process.env.S3_ADMIN_SECRET_KEY
 		}
-	});
+	})
 
 	const params = { 
 		RoleArn: process.env.IAM_ASSUMEROLE_ARN,

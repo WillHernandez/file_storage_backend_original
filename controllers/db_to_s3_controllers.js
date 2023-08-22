@@ -20,7 +20,7 @@ const uploadObjects = async (req, res) => {
 			secretAccessKey: SecretAccessKey,
 			sessionToken: SessionToken
 		}
-	});
+	})
 
 	const fileIsDuplicate = file => {
 		let fileName = `home/${req.cookies.username}/${file.originalname}`
@@ -32,7 +32,6 @@ const uploadObjects = async (req, res) => {
 		return fileName
 	}
 
-	// const userObjects = await getAllObjectsFromS3Bucket(req, res)
 	const putCommands = req.files.map(file => new PutObjectCommand({
 		ContentType: file.mimetype,
 		Body: file.buffer,
@@ -64,22 +63,22 @@ const getAllObjectsFromS3Bucket = async (req, res, client) => {
 	const getAllCommand = new ListObjectsV2Command({
     Bucket: process.env.S3_BUCKET_NAME, 
     MaxKeys: 100,
-  });
+  })
 
   try {
-    let isTruncated = true;
+    let isTruncated = true
     while (isTruncated) {
       const { Contents, IsTruncated, NextContinuationToken } = await client.send(getAllCommand)
 			Contents.map((c) => {
 				if(c.Key.startsWith(`home/${req.cookies.username}`))
 						s3ObjectFileNames.add(c.Key)
-				}); 
-      isTruncated = IsTruncated;
-      getAllCommand.input.ContinuationToken = NextContinuationToken;
+				})
+      isTruncated = IsTruncated
+      getAllCommand.input.ContinuationToken = NextContinuationToken
     }
 		return
   } catch (err) {
-    console.error(err);
+    console.error(err)
   }
 }
 
@@ -93,7 +92,7 @@ const getPresignedUrls = async (req, res) => {
 			secretAccessKey: SecretAccessKey,
 			sessionToken: SessionToken
 		}
-	});
+	})
 
 	await getAllObjectsFromS3Bucket(req, res, client)
 	const fileKeyArr = Array.from(s3ObjectFileNames)

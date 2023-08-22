@@ -2,7 +2,7 @@ const { createClient } = require('redis')
 const redisClient = createClient()
 redisClient.connect()
 
-redisClient.on('error', err => console.log('Redis Client Error', err));
+redisClient.on('error', err => console.log('Redis Client Error', err))
 
 const postRedisCache = async (req, res, payload) => {
 	try {

@@ -11,9 +11,22 @@ require('dotenv').config()
 
 app.use(express.json())
 app.use(cors({ origin: process.env.FRONTEND_URI, credentials: true }))
+// const whitelist = [process.env.FRONTEND_URI, 'http://127.0.0.1:55374'];
+// const corsOptions = {
+// 	origin: (origin, callback) => {
+// 		if(whitelist.indexOf(origin) !== -1 || !origin) {
+// 			callback(null, true);
+// 		} else {
+// 			callback(new Error('Not allowed by CORS'));
+// 		}
+// 	},
+// 	optionsSuccessStatus: 200
+// }
+// app.use(cors(corsOptions));
 
 app.use(cookieParser())
-app.use(session({ secret: process.env.SESSION_KEY, httpOnly: false, secure: false, maxAge: 3600000 }))
+app.use(session({ secret: process.env.SESSION_KEY, httpOnly: false, secure: false, maxAge: 3600000, resave: true, saveUninitialized: true }))
+
 app.use('/api/user', userRoutes)
 app.use('/api/bucket', validateToken, dbS3Routes)
 
