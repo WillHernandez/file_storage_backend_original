@@ -1,6 +1,6 @@
 const convert = require('heic-convert')
 
-const convertHeic = async (req, res, next)=> {
+module.exports = async (req, res, next)=> {
 	const heicFileIndx = []
 	try {
 		const buffers = await Promise.all(req.files.map((file, i) => {
@@ -22,8 +22,4 @@ const convertHeic = async (req, res, next)=> {
 	} catch(e) {
 		res.status(400).json({error: e})
 	}
-}
-
-module.exports = {
-	convertHeic
 }

@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { createIamUser, deleteIamUser } = require('../middlewares/create_iam_user')
+const { createIamUser, deleteIamUser } = require('../middlewares/iam_user_handler')
 const { flushRedis } = require('../middlewares/redis_cache')
 
 // populates backend with frontend cookies after successful account creation

@@ -19,8 +19,4 @@ const upload = multer({
 	}
 })
 
-const multerMiddleWare = upload.array('file')
-
-module.exports = {
-	multerMiddleWare
-}
+module.exports = upload.array('file')

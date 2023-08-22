@@ -1,6 +1,6 @@
 const { GetUserCommand, CognitoIdentityProviderClient } = require("@aws-sdk/client-cognito-identity-provider")
 
-const validateToken = async (req, res, next) => {
+module.exports = async (req, res, next) => {
   const client = new CognitoIdentityProviderClient({ 
     region: process.env.S3_REGION,
     credentials: {
@@ -16,8 +16,4 @@ const validateToken = async (req, res, next) => {
   } catch (e) {
     res.status(400).json({error: e})
   }
-}
-
-module.exports = {
-  validateToken
 }
