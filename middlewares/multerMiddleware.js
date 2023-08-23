@@ -1,22 +1,19 @@
 const multer = require('multer')
 
-const storage = multer.memoryStorage()
-
 const fileFilter = (req, file, cb) => {
-	if(file.mimetype.split('/')[0] === "image")	{
+	const fileType = file.mimetype.split('/')[0] 
+	if(fileType === "image" || fileType === "video")	{
 		cb(null, true)
 	} else {
-		cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", false))
+		cb(null, false)
 	}
 }
 
-const upload = multer({
-	storage,
+module.exports = multer({
+	storage: multer.memoryStorage(),
 	fileFilter,
 	limits: {
 		fileSize: 1000000000,
 		files: 50
 	}
-})
-
-module.exports = upload.array('file')
+}).array('file')

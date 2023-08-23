@@ -1,20 +1,21 @@
-const convert = require('heic-convert')
+const heicConvert = require('heic-convert')
 
-module.exports = async (req, res, next)=> {
+module.exports = async (req, res, next) => {
 	const heicFileIndx = []
 	try {
-		const buffers = await Promise.all(req.files.map((file, i) => {
+		const convertedHeicFiles = await Promise.all(req.files.map((file, i) => {
 			if(file.mimetype === 'image/heic') {
 				heicFileIndx.push(i)
-				return convert({
+				return heicConvert({
 					buffer: file.buffer,
 					format: 'JPEG',
 					quality: 1
 				})
-			}}))
+			}
+		}))
 
 		heicFileIndx.forEach(i => {
-			req.files[i].buffer = buffers[i]
+			req.files[i].buffer = convertedHeicFiles[i]
 			req.files[i].mimetype = 'image/jpeg'
 			req.files[i].originalname = req.files[i].originalname.toLowerCase().replace('.heic', '.jpg')
 		})

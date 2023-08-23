@@ -22,12 +22,17 @@ const getRedisCache = async (req, res, next) => {
 	next()
 }
 
-const updateRedisCache = async (req, res, payload) => {
+const addToRedisCache = async (req, res, payload) => {
 	const urlsArr = await redisClient.get('imageUrls')	
 	const parsedUrlArr = JSON.parse(urlsArr)
 	const concatArrays = [...parsedUrlArr, ...payload]
 	await redisClient.set("imageUrls", JSON.stringify(concatArrays))
 	res.status(200).json(concatArrays)
+}
+
+const removeFromRedisCache = async (req, res, payload) => {
+	const urlsArr = await redisClient.get('imageUrls')	
+	const parsedUrlArr = JSON.parse(urlsArr)
 }
 
 const flushRedis = async () => {
@@ -37,6 +42,7 @@ const flushRedis = async () => {
 module.exports = {
 	postRedisCache,
 	getRedisCache,
-	updateRedisCache,
+	addToRedisCache,
+	removeFromRedisCache,
 	flushRedis
 }

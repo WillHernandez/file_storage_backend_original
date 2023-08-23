@@ -7,7 +7,7 @@ const {
 } = require("@aws-sdk/client-s3")
 
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
-const { postRedisCache, updateRedisCache } =  require('../middlewares/redis_cache')
+const { postRedisCache, addToRedisCache, removeFromRedisCache } =  require('../middlewares/redis_cache')
 
 const s3ObjectFileNames = new Set()
 
@@ -53,9 +53,39 @@ const uploadObjects = async (req, res) => {
 		// get presigned urls for all new uploaded objects
 		const urlsArr = await Promise.all(getCommands.map(cmd => getSignedUrl(client, cmd)))
 		// update redis with new urls and return full urlsArr
-		await updateRedisCache(req, res, urlsArr)
+		await addToRedisCache(req, res, urlsArr)
 	} catch(e) {
 		res.status(400).json({error: e})
+	}
+}
+
+const deleteObjects = async (req, res) => {
+	const { AccessKeyId, SecretAccessKey, SessionToken } = req.Credentials
+	const client = new S3Client({
+		region: process.env.S3_REGION,
+		credentials: {
+			accessKeyId: AccessKeyId,
+			secretAccessKey: SecretAccessKey,
+			sessionToken: SessionToken
+		}
+	})
+
+	const deleteCommands = req.files.map(file => 
+		new DeleteObjectCommand({
+			Bucket: process.env.S3_BUCKET_NAME,
+			Key: file
+		})
+	)
+	// remove files from redis cache
+	req.files.forEach(file => s3ObjectFileNames.delete(`home/${req.cookies.username}/${file}`)) // check file for name
+
+	try { // remove files from S3
+		const commands = await Promise.all(deleteCommands)
+		await Promise.all(commands.map(cmd => client.send(cmd)))
+		// await removeFromRedisCache(req, res, Array.from(s3ObjectFileNames))
+		await postRedisCache(req, res, Array.from(s3ObjectFileNames))
+	} catch(e) {
+		res.status(400).json(e)
 	}
 }
 
@@ -106,7 +136,7 @@ const getPresignedUrls = async (req, res) => {
 	
 	try {
 		const urls = await Promise.all(getCommands.map(cmd => getSignedUrl(client, cmd)))
-		return await postRedisCache(req, res, urls)
+		await postRedisCache(req, res, urls)
 	} catch(e) {
 		res.status(400).json({error: e})
 	}
@@ -114,6 +144,6 @@ const getPresignedUrls = async (req, res) => {
 
 module.exports = {
 	uploadObjects,
-	getAllObjectsFromS3Bucket,
+	deleteObjects,
 	getPresignedUrls
 }
