@@ -12,7 +12,6 @@ router.post('/newuser', async (req, res) => {
 router.post('/login', (req, res) => res.sendStatus(200))
 
 router.get('/logout', async (req, res) => {
-	req.session.destroy()
 	await flushRedis()
 	res.clearCookie('Credentials')
 	res.sendStatus(200)

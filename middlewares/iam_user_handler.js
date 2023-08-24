@@ -14,7 +14,6 @@ const createIamUser = async (req, res, next)=> {
   try {
     await client.send(command)
     await addUserToGroup(username, client)
-    req.session.authorized = true
     res.sendStatus(200)
   } catch(e) {
     res.status(409).json(e)
