@@ -14,6 +14,6 @@ module.exports = async (req, res, next) => {
     await client.send(command)
     next()
   } catch (e) {
-    res.status(400).json({error: e})
+    res.status(400).json({error: e.message})
   }
 }

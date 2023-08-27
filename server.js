@@ -9,14 +9,13 @@ const validateToken = require('./middlewares/validateToken.js')
 require('dotenv').config()
 
 app.use(express.json())
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }))
 app.use(cookieParser())
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }))
 
 app.use('/api/user', userRoutes)
-app.use('/api/bucket', validateToken, S3Routes)
+// app.use('/api/bucket', validateToken, S3Routes)
+app.use('/api/bucket', S3Routes)
 
-app.listen(port, () => {
-	console.log(`http://localhost:${port}/`)
-})
+app.listen(port)
 
 module.exports = app
