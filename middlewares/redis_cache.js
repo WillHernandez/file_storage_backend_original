@@ -30,9 +30,15 @@ const addToRedisCache = async (req, res, payload) => {
 	res.status(200).json(concatArrays)
 }
 
-const removeFromRedisCache = async (req, res, payload) => {
+const removeFromRedisCache = async (req, res) => {
 	const urlsArr = await redisClient.get('imageUrls')	
-	const parsedUrlArr = JSON.parse(urlsArr)
+	const urls = new Set(JSON.parse(urlsArr))
+	req.body.data.forEach(file => {
+		urls.delete(file)
+	})
+	const arrayFromSet = Array.from(urls)
+	await redisClient.set('imageUrls', JSON.stringify(arrayFromSet))
+	res.status(200).json(arrayFromSet)
 }
 
 const flushRedis = async () => {

@@ -72,12 +72,19 @@ const deleteObjects = async (req, res) => {
 		}
 	})
 
-	// extract file name from presigned Url
+	// extract file name from presigned Url, currently only passing one file but will make possible to mass delete photos with below map
 	const fileNames = req.body.data.map(file => {
 		const lowerFile = file.toLowerCase()
 		const start = lowerFile.indexOf('home')
-		const end = lowerFile.indexOf('.jpg') + 4
-		return decodeURIComponent(file.slice(start, end))
+		if(lowerFile.indexOf('.jpg') !== -1) {
+			return decodeURIComponent(file.slice(start, lowerFile.indexOf('.jpg') + 4))
+		}
+		if(lowerFile.indexOf('.jpeg') !== -1) {
+			return decodeURIComponent(file.slice(start, lowerFile.indexOf('.jpeg') + 5))
+		}
+		if(lowerFile.indexOf('.png') !== -1) {
+			return decodeURIComponent(file.slice(start, lowerFile.indexOf('.png') + 4))
+		}
 	})
 
 	const deleteCommands = fileNames.map(file => 
@@ -90,10 +97,10 @@ const deleteObjects = async (req, res) => {
 	// remove files from redis cache
 	fileNames.forEach(file => s3ObjectFileNames.delete(file)) // check file for name
 
-	try { // remove files from S3
+	try {
 		const commands = await Promise.all(deleteCommands)
 		await Promise.all(commands.map(cmd => client.send(cmd)))
-		await postRedisCache(req, res, Array.from(s3ObjectFileNames))
+		await removeFromRedisCache(req, res)
 	} catch(e) {
 		res.status(400).json(e)
 	}
@@ -105,6 +112,7 @@ const getAllObjectsFromS3Bucket = async (req, res, client) => {
     MaxKeys: 100,
   })
 
+	s3ObjectFileNames.clear()
   try {
     let isTruncated = true
     while (isTruncated) {
@@ -134,6 +142,7 @@ const getPresignedUrls = async (req, res) => {
 		}
 	})
 
+	// this set should NOT be returning files from other folders.. Big mistake
 	await getAllObjectsFromS3Bucket(req, res, client)
 	const fileKeyArr = Array.from(s3ObjectFileNames)
 
