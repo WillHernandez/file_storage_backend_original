@@ -59,8 +59,6 @@ const uploadObjects = async (req, res) => {
 	}
 }
 
-// currently deleting file from s3
-// problem is, we are not returning correct presigned urls so images area all blank after function call
 const deleteObjects = async (req, res) => {
 	const { AccessKeyId, SecretAccessKey, SessionToken } = req.Credentials
 	const client = new S3Client({
@@ -95,7 +93,7 @@ const deleteObjects = async (req, res) => {
 	)
 
 	// remove files from redis cache
-	fileNames.forEach(file => s3ObjectFileNames.delete(file)) // check file for name
+	fileNames.forEach(file => s3ObjectFileNames.delete(file))
 
 	try {
 		const commands = await Promise.all(deleteCommands)
@@ -142,7 +140,6 @@ const getPresignedUrls = async (req, res) => {
 		}
 	})
 
-	// this set should NOT be returning files from other folders.. Big mistake
 	await getAllObjectsFromS3Bucket(req, res, client)
 	const fileKeyArr = Array.from(s3ObjectFileNames)
 
