@@ -5,7 +5,6 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const S3Routes = require('./routes/s3_routes')
 const userRoutes = require('./routes/user_routes')
-const validateToken = require('./middlewares/validateToken.js')
 require('dotenv').config()
 
 app.use(express.json())
