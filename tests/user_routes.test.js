@@ -10,7 +10,7 @@ describe("User routes / permissions - AWS IAM api requests", () => {
 		const response = await supertest(backend_url).post('/api/user/newuser').send(data)
 		expect(response.status).toEqual(200);
 	})
-
+	 
 	it('If AWS IAM user already exists api/user/newuser : Status 409', async () => {
 		const response = await supertest(backend_url).post('/api/user/newuser').send(data)
 		expect(response.status).toEqual(409);
