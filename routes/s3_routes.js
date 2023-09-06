@@ -3,18 +3,16 @@ const router = express.Router()
 const multerMiddleWare = require('../middlewares/multerMiddleware.js')
 const convertHeic = require('../middlewares/convert_heic')
 const assumeRole = require('../middlewares/assume_role.js')
+const jwttoken = require('../middlewares/jwt_token.js')
+const awstoken = require('../middlewares/aws_token.js')
 const { getRedisCache } = require('../middlewares/redis_cache.js')
-const authenticate = require('../middlewares/authenticate.js')
-// const validateToken = require('../middlewares/validateToken.js')
 
 const { uploadObjects, deleteObjects, getPresignedUrls } = require('../controllers/s3_controllers.js')
 
-// router.post('/upload', validateToken, multerMiddleWare, (req, res, next) => next(), convertHeic, assumeRole, uploadObjects)
-router.post('/upload', authenticate, multerMiddleWare, (req, res, next) => next(), convertHeic, assumeRole, uploadObjects)
+router.post('/upload', jwttoken, awstoken, multerMiddleWare, (req, res, next) => next(), convertHeic, assumeRole, uploadObjects)
 
-// router.get('/getallobjects', validateToken, getRedisCache, assumeRole, getPresignedUrls)
-router.get('/getallobjects', authenticate, getRedisCache, assumeRole, getPresignedUrls)
+router.get('/getallobjects', jwttoken, awstoken, getRedisCache, assumeRole, getPresignedUrls)
 
-router.post('/delete', authenticate, assumeRole, deleteObjects)
+router.post('/delete', jwttoken, awstoken, assumeRole, deleteObjects)
 
 module.exports = router

@@ -1,6 +1,6 @@
 const { IAMClient, CreateUserCommand, AddUserToGroupCommand, DeleteUserCommand, RemoveUserFromGroupCommand } = require("@aws-sdk/client-iam")
 
-const createIamUser = async (req, res, next)=> {
+const createIamUser = async (req, res)=> {
   const client = new IAMClient({ 
     region: process.env.S3_REGION,
     credentials: {

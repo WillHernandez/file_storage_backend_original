@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
 		  secretAccessKey: process.env.S3_ADMIN_SECRET_KEY
     }
   })
-  const params = { AccessToken: req.cookies.accessToken }
+  const params = { AccessToken: req.user.awsToken}
   const command = new GetUserCommand(params)
   try {
     await client.send(command)
