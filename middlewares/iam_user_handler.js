@@ -9,7 +9,7 @@ const createIamUser = async (req, res)=> {
     }
   })
 
-  const username = req.cookies.username || req.body.username
+  const username = req.body.username
   const command = new CreateUserCommand({ UserName: username })
   try {
     await client.send(command)
@@ -38,7 +38,7 @@ const deleteIamUser = async (req, res, next)=> {
     }
   })
 
-  const username = req.cookies.username || req.body.username
+  const username = req.body.username
   const command = new DeleteUserCommand({ UserName: username })
   try {
     await removeUserFromGroup(username, client)
