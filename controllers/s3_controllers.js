@@ -23,9 +23,9 @@ const uploadObjects = async (req, res) => {
 	})
 
 	const fileIsDuplicate = file => {
-		let fileName = `home/${req.cookies.username}/${file.originalname}`
+		let fileName = `home/${req.user.username}/${file.originalname}`
 		if(s3ObjectFileNames.has(fileName)) {
-			fileName = `home/${req.cookies.username}/copy_${file.originalname}`
+			fileName = `home/${req.user.username}/copy_${file.originalname}`
 		}
 		// update set for fast lookup
 		s3ObjectFileNames.add(fileName)
@@ -116,7 +116,7 @@ const getAllObjectsFromS3Bucket = async (req, res, client) => {
     while (isTruncated) {
       const { Contents, IsTruncated, NextContinuationToken } = await client.send(getAllCommand)
 			Contents.map((c) => {
-				if(c.Key.startsWith(`home/${req.cookies.username}`))
+				if(c.Key.startsWith(`home/${req.user.username}`))
 						s3ObjectFileNames.add(c.Key)
 				})
       isTruncated = IsTruncated

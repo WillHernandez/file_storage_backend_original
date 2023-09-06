@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
 
 	const params = { 
 		RoleArn: process.env.IAM_ASSUMEROLE_ARN,
-		RoleSessionName: `file-storage-role-session-${req.cookies.username}`,
+		RoleSessionName: `file-storage-role-session-${req.user.username}`,
 		DurationSeconds: 3600
 	}
 	const command = new AssumeRoleCommand(params)

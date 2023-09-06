@@ -1,19 +1,23 @@
 const express = require('express')
 const router = express.Router()
+const jwt = require('jsonwebtoken')
 const { createIamUser, deleteIamUser } = require('../middlewares/iam_user_handler')
 const { flushRedis } = require('../middlewares/redis_cache')
 
-// populates backend with frontend cookies after successful account creation
 router.post('/newuser', async (req, res) => {
 	await createIamUser(req, res)
 }) 
 
-// populates backend with frontend cookies
-router.post('/login', (req, res) => res.sendStatus(200))
+// return access token to frontend
+router.post('/login', (req, res) => {
+	const user = req.body
+	const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN)
+	res.status(200).json(accessToken)
+})
 
 router.get('/logout', async (req, res) => {
 	await flushRedis()
-	res.clearCookie('Credentials')
+	req.body = null
 	res.sendStatus(200)
 })
 

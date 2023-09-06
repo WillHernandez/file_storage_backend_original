@@ -22,7 +22,7 @@ const postRedisCache = async (req, res, payload) => {
 
 const getRedisCache = async (req, res, next) => {
   const urlsArr = await redisClient.get('imageUrls')
-  if (urlsArr && urlsArr.length) {
+  if (urlsArr) { //this is a string
     const parsedUrlArr = JSON.parse(urlsArr)
     return res.status(200).json(parsedUrlArr)
   }
