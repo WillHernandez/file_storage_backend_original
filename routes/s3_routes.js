@@ -13,6 +13,6 @@ router.post('/upload', jwttoken, awstoken, multerMiddleWare, (req, res, next) =>
 
 router.get('/getallobjects', jwttoken, awstoken, getRedisCache, assumeRole, getPresignedUrls)
 
-router.post('/delete', jwttoken, awstoken, assumeRole, deleteObjects)
+router.post('/delete', jwttoken, assumeRole, deleteObjects)
 
 module.exports = router

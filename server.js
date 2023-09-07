@@ -13,8 +13,6 @@ app.use('/api/test', (req, res) => res.status(200).json('Test Successful!'))
 app.use('/api/user', userRoutes)
 app.use('/api/bucket', S3Routes)
 
-app.listen(port, () => {
-  console.log(`connected on http://localhost:${port}`)
-})
+app.listen(port)
 
 module.exports = app

@@ -71,7 +71,7 @@ const deleteObjects = async (req, res) => {
 	})
 
 	// extract file name from presigned Url, currently only passing one file but will make possible to mass delete photos with below map
-	const fileNames = req.body.data.map(file => {
+	const fileNames = req.body.urls.map(file => {
 		const lowerFile = file.toLowerCase()
 		const start = lowerFile.indexOf('home')
 		if(lowerFile.indexOf('.jpg') !== -1) {
